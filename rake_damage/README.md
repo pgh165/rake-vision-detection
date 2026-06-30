@@ -1,15 +1,13 @@
 # 제진기 레이크 파손 검출 (YOLOv8n)
 
-제진기(screen rake) 영상에서 **레이크 파손(damage)** 을 객체 검출(bounding box)로 찾아내고,
-엣지 디바이스(Hailo-8L) 배포를 위해 ONNX 로 export 한다.
+제진기(screen rake) 영상에서 **레이크 파손(damage)** 을 객체 검출(bounding box)로 찾아낸다.
 
 ## 개요
 - **태스크**: 객체 검출 (Object Detection, bbox)
 - **모델**: Ultralytics `yolov8n` 전이학습
 - **클래스**: `0: damage` (단일 클래스)
-- **입력 크기**: `imgsz=640` (Hailo-8L 호환)
+- **입력 크기**: `imgsz=640`
 - **학습 환경**: RTX 5070 Ti (CUDA, `device=0`)
-- **배포 목표**: ONNX → Hailo DFC int8 → `.hef`
 
 ## 데이터셋
 - 출처: Roboflow Universe (`my-first-project-iz8yo`, CC BY 4.0) — [README.dataset.txt](README.dataset.txt), [README.roboflow.txt](README.roboflow.txt)
@@ -23,8 +21,7 @@ rake_damage/
 ├── valid/images,labels  # 검증 세트 (8)
 ├── split.py         # 시간순 뒤 20%를 valid로 분리 (프레임 누수 방지)
 ├── train.py         # 학습 스크립트
-├── make.py          # 영상 추론 + 검출 박스 오버레이 영상 생성
-└── export_onnx.py   # ONNX export (Hailo 입력용)
+└── make.py          # 영상 추론 + 검출 박스 오버레이 영상 생성
 ```
 
 ## 데이터 분할 — `split.py`
@@ -42,7 +39,7 @@ python train.py
 | 항목 | 값 | 비고 |
 |------|-----|------|
 | epochs | 50 | val 곡선상 10~15 정점 → 50이면 충분, `patience=10` |
-| imgsz | 640 | Hailo-8L 호환 |
+| imgsz | 640 | |
 | batch | 16 | |
 | 증강 | hsv/degrees/translate/scale/fliplr/mosaic 약하게 | 데이터 적음(38장) → 과적합 억제 |
 
@@ -58,26 +55,9 @@ python train.py
 python make.py   # 상단 MODEL_PATH / VIDEO_IN 경로 수정 후 실행
 ```
 
-## ONNX Export — `export_onnx.py`
-Hailo-8L 배포 파이프라인의 첫 단계. 고정 입력 크기로 export 한다.
-
-```bash
-python export_onnx.py
-```
-
-| 옵션 | 값 | 이유 |
-|------|-----|------|
-| `format` | onnx | Hailo DFC 입력 |
-| `opset` | 11 | Hailo DFC 호환 |
-| `dynamic` | False | 고정 입력 크기 (Hailo 필수) |
-| `imgsz` | 640 | |
-| `simplify` | True | onnx-simplifier 적용 |
-
-다음 단계: Hailo DFC 로 int8 calibration → `.hef` 변환
-
 ## 결과물
 - `result_detection.mp4` — 파손 검출 박스 오버레이 영상 (용량상 제외)
 - `2001189 박지호 레이크 파손.mp4` — 시연 영상 (제외)
 
-> 영상·모델 가중치(`*.mp4`, `*.pt`, `*.onnx`)는 용량 때문에 `.gitignore` 처리되어 있다.
+> 영상·모델 가중치(`*.mp4`, `*.pt`)는 용량 때문에 `.gitignore` 처리되어 있다.
 > 학습을 직접 돌리면 `best.pt` 가 재생성된다.
