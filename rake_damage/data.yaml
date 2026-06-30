@@ -1,4 +1,4 @@
-path: C:\\Users\\parkj\\Desktop\\capstone\\rake_detection\\rake_dataset_ready
+path: C:/Users/parkj/Desktop/capstone/rake_detection/rake_damage
 train: train/images
 val: valid/images
 nc: 1

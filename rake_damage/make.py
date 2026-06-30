@@ -7,7 +7,7 @@ import os
 from ultralytics import YOLO
 
 # ===== 설정 (본인 경로로 수정) =====
-MODEL_PATH = "C:/Users/parkj/Desktop/capstone/rake_detection/rake_dataset_ready/runs/detect/rake_damage/exp_clean/weights/best.pt"   # ← Get-ChildItem으로 찾은 실제 경로
+MODEL_PATH = "C:/Users/parkj/Desktop/capstone/rake_detection/rake_damage/runs/detect/rake_damage_v2/exp1/weights/best.pt"   # ← Get-ChildItem으로 찾은 실제 경로
 VIDEO_IN   = "C:/Users/parkj/Desktop/capstone/rake_detection/KakaoTalk_20260524_143357990.mp4"
 VIDEO_OUT  = "result_detection.mp4"
 CONF       = 0.15

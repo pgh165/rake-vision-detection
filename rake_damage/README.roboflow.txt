@@ -1,8 +1,8 @@
 
-My First Project - vdataset my-first-project-iz8yo
+My First Project - v2 2026-06-30 5:47pm
 ==============================
 
-This dataset was exported via roboflow.com on June 27, 2026 at 9:34 AM GMT
+This dataset was exported via roboflow.com on June 30, 2026 at 8:48 AM GMT
 
 Roboflow is an end-to-end computer vision platform that helps you
 * collaborate with your team on computer vision projects
@@ -17,7 +17,17 @@ visit https://github.com/roboflow/notebooks
 
 To find over 100k other datasets and pre-trained models, visit https://universe.roboflow.com
 
-The dataset includes 38 images.
+The dataset includes 345 images.
 Object are annotated in YOLOv8 format.
 
-No pre-processing or augmentation was applied.
+The following pre-processing was applied to each image:
+* Auto-orientation of pixel data (with EXIF-orientation stripping)
+* Resize to 640x640 (Stretch)
+
+The following augmentation was applied to create 3 versions of each source image:
+* 50% probability of horizontal flip
+* Random rotation of between -10 and +10 degrees
+* Random brigthness adjustment of between -15 and +15 percent
+* Random exposure adjustment of between -15 and +15 percent
+
+

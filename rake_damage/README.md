@@ -9,24 +9,28 @@
 - **입력 크기**: `imgsz=640`
 - **학습 환경**: RTX 5070 Ti (CUDA, `device=0`)
 
-## 데이터셋
+## 데이터셋 (v2, 2026-06-30 갱신)
 - 출처: Roboflow Universe (`my-first-project-iz8yo`, CC BY 4.0) — [README.dataset.txt](README.dataset.txt), [README.roboflow.txt](README.roboflow.txt)
-- 구성: `train/` 38장, `valid/` 8장
+- 구성: `train/` **383장** (고유 원본 115개), `valid/` **66장** (고유 원본 22개) — 총 449장
+- 영상에서 파손이 뚜렷한 프레임(`dmg_*`, `KakaoTalk_*`)을 추가 추출 → Roboflow에서 **증강**(원본 1장당 여러 장 생성)
+- 분할: Roboflow에서 **그룹 단위 분할** — 같은 원본의 증강본이 train/valid 에 섞이지 않게 하여 **증강 누수 차단**
 - 설정: [data.yaml](data.yaml)
 
 ```
 rake_damage/
 ├── data.yaml        # 데이터셋 경로 / 클래스 정의
-├── train/images,labels  # 학습 세트 (38)
-├── valid/images,labels  # 검증 세트 (8)
-├── split.py         # 시간순 뒤 20%를 valid로 분리 (프레임 누수 방지)
+├── train/images,labels  # 학습 세트 (383, 증강 포함)
+├── valid/images,labels  # 검증 세트 (66)
+├── split.py         # (구 v1) 시간순 뒤 20%를 valid로 분리하던 스크립트
 ├── train.py         # 학습 스크립트
 └── make.py          # 영상 추론 + 검출 박스 오버레이 영상 생성
 ```
 
-## 데이터 분할 — `split.py`
-영상에서 추출한 프레임은 인접 프레임끼리 거의 동일하다. 무작위 분할 시 **train/valid 누수**가
-생기므로, **시간순 정렬 후 뒤쪽 20% 를 valid** 로 떼어내 누수를 최소화한다.
+## 데이터 분할
+v2 데이터셋은 **Roboflow에서 그룹 단위로 분할**된 채 내려받는다. 같은 원본 프레임에서 파생된
+증강본이 train/valid 양쪽에 흩어지면 검증 점수가 부풀려지는 **증강 누수**가 생기므로, 원본 그룹째로
+한쪽에만 배치한다.
+> `split.py` 는 v1에서 영상 프레임을 시간순 뒤 20%로 잘라 valid로 떼던 스크립트로, v2에서는 사용하지 않는다.
 
 ## 학습 — `train.py`
 `yolov8n.pt` 사전학습 가중치에서 시작하여 전이학습한다.
@@ -35,15 +39,16 @@ rake_damage/
 python train.py
 ```
 
-주요 하이퍼파라미터
+주요 하이퍼파라미터 (v2)
 | 항목 | 값 | 비고 |
 |------|-----|------|
-| epochs | 50 | val 곡선상 10~15 정점 → 50이면 충분, `patience=10` |
+| epochs | 100 | `patience=20` 조기종료 |
 | imgsz | 640 | |
 | batch | 16 | |
-| 증강 | hsv/degrees/translate/scale/fliplr/mosaic 약하게 | 데이터 적음(38장) → 과적합 억제 |
+| 증강 | hsv/degrees/translate/scale/fliplr/mosaic 약하게 | Roboflow에서 이미 증강됨 → 학습측 증강은 약하게 |
 
-학습 후 `mAP50`, `mAP50-95` 를 출력한다. 결과 가중치: `rake_damage/exp_clean/weights/best.pt`
+학습 후 `mAP50`, `mAP50-95` 를 출력한다.
+결과 가중치: `rake_damage/runs/detect/rake_damage_v2/exp1/weights/best.pt`
 
 ## 추론 영상 생성 — `make.py`
 학습된 `best.pt` 로 영상에 파손 박스를 오버레이해 결과 영상을 만든다.
