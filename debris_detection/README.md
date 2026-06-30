@@ -48,14 +48,17 @@ python train_seg.py
 처리 파이프라인
 1. 프레임별 세그멘테이션 추론 (`conf=0.15`, `retina_masks=True`)
 2. 모든 인스턴스 마스크를 원본 해상도로 OR 결합
-3. `dilate` + `morphologyEx(CLOSE)` 로 흩어진 마스크를 덩어리로 통합 (`DILATE=35`)
-4. 통합 영역 면적 비율 = `merged.sum() / (H*W)` 계산
+3. 영상 해상도로 **전체 픽셀 수** `TOTAL_PX = W*H` 계산 (비율 분모)
+4. **인식된 세그멘테이션 픽셀 수** `seg_px = union.sum()` 를 전체 픽셀 대비 비율(%)로 환산
+   → `pct = seg_px / TOTAL_PX * 100`
 5. 최근 `SMOOTH_N=15` 프레임 **시간 평활화** 로 수치 안정화
-6. 임계값으로 단계 판정
-   - `< 0.08` → **ADEQUATE (low)**
-   - `< 0.25` → **MODERATE**
-   - `≥ 0.25` → **HIGH - CLEAN!** (청소 필요)
-7. 통합 덩어리를 반투명 오버레이 + 외곽선으로 표시, 면적%·단계·덩어리 수를 패널에 출력 → 결과 영상 저장
+6. 면적 비율(%)로 단계 판정
+   - `< 10%` → **CLEAR**
+   - `10~30%` → **LOW**
+   - `30~60%` → **MEDIUM**
+   - `60~100%` → **HIGH** (청소 필요)
+7. 통합 덩어리(`dilate`+`CLOSE`, `DILATE=35`)를 반투명 오버레이 + 외곽선으로 표시,
+   면적%·단계·덩어리 수를 패널에 출력 → 결과 영상 저장
 
 ```bash
 python judge_debris.py   # 상단 MODEL_PATH / VIDEO_IN 경로 수정 후 실행
@@ -67,7 +70,7 @@ python judge_debris.py   # 상단 MODEL_PATH / VIDEO_IN 경로 수정 후 실행
 | `CONF` | 0.15 | 마스크 감지 임계값 |
 | `DILATE` | 35 | 덩어리 통합 강도 (20~50) |
 | `SMOOTH_N` | 15 | 시간 평활화 프레임 수 |
-| `TH_LOW` / `TH_HIGH` | 0.08 / 0.25 | 적음/많음 면적 임계 |
+| `TH_LOW` / `TH_MEDIUM` / `TH_HIGH` | 10 / 30 / 60 | LOW/MEDIUM/HIGH 면적 비율(%) 임계 |
 
 ## 결과물
 - `result_debris.mp4` — 부유물 영역 오버레이 + 단계 판정 영상 (용량상 저장소에서 제외)

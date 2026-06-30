@@ -19,8 +19,10 @@ VIDEO_OUT  = "result_debris_cluster.mp4"
 CONF       = 0.15    # 마스크 감지 임계값
 DILATE     = 35      # 덩어리 통합 강도 (클수록 멀리 있는 것도 이어짐, 20~50에서 조절)
 SMOOTH_N   = 15      # 시간 평활화: 최근 N프레임 평균
-TH_LOW     = 0.08    # 이하 = 적음
-TH_HIGH    = 0.25    # 이상 = 많음
+# 면적 비율(%) 임계값: 인식된 세그멘테이션 픽셀 / 전체 픽셀 * 100
+TH_LOW     = 10      # 10~30%  = LOW
+TH_MEDIUM  = 30      # 30~60%  = MEDIUM
+TH_HIGH    = 60      # 60~100% = HIGH  (10% 미만은 CLEAR)
 # ===============
 
 assert os.path.exists(MODEL_PATH), f"모델 없음: {MODEL_PATH}"
@@ -32,6 +34,10 @@ fps = cap.get(cv2.CAP_PROP_FPS) or 24.0
 W = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 H = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+# 영상 해상도로 전체 픽셀 수 계산 (비율 분모)
+TOTAL_PX = W * H
+print(f"입력 영상: {W}x{H} = {TOTAL_PX} px/frame, {fps:.1f}fps, {total}프레임")
 
 def open_writer(path, fps, size):
     for codec, ext in [("mp4v",".mp4"),("avc1",".mp4"),("XVID",".avi")]:
@@ -72,19 +78,23 @@ while True:
     merged = cv2.dilate(union, k_dilate, iterations=1)
     merged = cv2.morphologyEx(merged, cv2.MORPH_CLOSE, k_close)
 
-    # 3) 통합 덩어리 개수 & 면적
+    # 3) 통합 덩어리 개수
     n_cluster, _ = cv2.connectedComponents(merged)
     n_cluster -= 1   # 배경 제외
-    raw_ratio = float(merged.sum()) / (H * W)
+
+    # 인식된 세그멘테이션 픽셀 수 → 전체 픽셀 대비 비율(%)
+    seg_px = int(union.sum())
+    raw_pct = seg_px / TOTAL_PX * 100.0
 
     # 4) 시간 평활화
-    ratio_hist.append(raw_ratio)
-    ratio = sum(ratio_hist) / len(ratio_hist)
+    ratio_hist.append(raw_pct)
+    pct = sum(ratio_hist) / len(ratio_hist)
 
-    # 5) 단계 판단
-    if ratio < TH_LOW:      level, color = "ADEQUATE (low)", (0,200,0)
-    elif ratio < TH_HIGH:   level, color = "MODERATE",       (0,200,255)
-    else:                   level, color = "HIGH - CLEAN!",  (0,0,255)
+    # 5) 단계 판단 (퍼센트 기준)
+    if pct < TH_LOW:        level, color = "CLEAR",  (0,200,0)     # <10%
+    elif pct < TH_MEDIUM:   level, color = "LOW",    (0,200,255)   # 10~30%
+    elif pct < TH_HIGH:     level, color = "MEDIUM", (0,140,255)   # 30~60%
+    else:                   level, color = "HIGH",   (0,0,255)     # 60~100%
 
     # 6) 시각화: 통합 덩어리를 반투명 색으로 오버레이
     overlay = frame.copy()
@@ -96,7 +106,7 @@ while True:
 
     # 7) 정보 패널
     cv2.rectangle(annotated, (10,10), (560,120), (0,0,0), -1)
-    cv2.putText(annotated, f"debris: {ratio*100:.1f}%", (20,50),
+    cv2.putText(annotated, f"debris: {pct:.1f}%", (20,50),
                 cv2.FONT_HERSHEY_SIMPLEX, 1.1, (255,255,255), 2)
     cv2.putText(annotated, level, (20,95),
                 cv2.FONT_HERSHEY_SIMPLEX, 1.0, color, 2)
@@ -106,7 +116,7 @@ while True:
     out.write(annotated)
     idx += 1
     if idx % 30 == 0:
-        print(f"{idx}/{total} ... {ratio*100:.1f}% {level} clusters={n_cluster}")
+        print(f"{idx}/{total} ... {pct:.1f}% {level} clusters={n_cluster}")
 
 cap.release(); out.release()
 size = os.path.getsize(out_path) if os.path.exists(out_path) else 0
