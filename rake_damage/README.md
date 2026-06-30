@@ -62,7 +62,6 @@ python make.py   # 상단 MODEL_PATH / VIDEO_IN 경로 수정 후 실행
 
 ## 결과물
 - `result_detection.mp4` — 파손 검출 박스 오버레이 영상 (용량상 제외)
-- `2001189 박지호 레이크 파손.mp4` — 시연 영상 (제외)
 
 > **데이터셋**(`train/`, `valid/`)과 영상·모델 가중치(`*.mp4`, `*.pt`)는 `.gitignore` 처리되어
 > 저장소에 없다. 데이터셋은 위 Roboflow 링크에서 받고, 학습을 직접 돌리면 `best.pt` 가 재생성된다.
