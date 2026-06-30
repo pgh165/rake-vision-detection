@@ -23,6 +23,14 @@ debris_seg/
 # 라벨 캐시
 *.cache
 
+# 데이터셋 (Roboflow에서 재생성 가능 → 저장소에서 제외)
+debris_detection/train/
+debris_detection/valid/
+rake_damage/train/
+rake_damage/valid/
+extracted_frames/
+damage_frames/
+
 # 이미지 결과물
 *_detected*.png
 

@@ -76,5 +76,5 @@ python judge_debris.py   # 상단 MODEL_PATH / VIDEO_IN 경로 수정 후 실행
 - `result_debris.mp4` — 부유물 영역 오버레이 + 단계 판정 영상 (용량상 저장소에서 제외)
 - `2001189 박지호 부유물 검출.mp4` — 시연 영상 (제외)
 
-> 영상·모델 가중치(`*.mp4`, `*.pt`)는 용량 때문에 `.gitignore` 처리되어 있다.
-> 학습을 직접 돌리면 `best.pt` 가 재생성된다.
+> **데이터셋**(`train/`, `valid/`)과 영상·모델 가중치(`*.mp4`, `*.pt`)는 `.gitignore` 처리되어
+> 저장소에 없다. 데이터셋은 위 Roboflow 링크에서 받고, 학습을 직접 돌리면 `best.pt` 가 재생성된다.

@@ -35,7 +35,8 @@ pip install -r requirements.txt
 ```
 
 ## 저장소에서 제외된 항목
-용량 문제로 다음은 `.gitignore` 처리되어 있다 (학습/추론을 직접 실행하면 재생성됨).
+다음은 `.gitignore` 처리되어 저장소에 포함하지 않는다.
+- **데이터셋** (`*/train/`, `*/valid/` 이미지·라벨) — Roboflow Universe 에서 재생성 가능 (각 README의 출처 링크 참고)
 - 영상 파일 `*.mp4`, `*.avi` (시연·결과 영상)
 - 모델 가중치 `*.pt`, `*.onnx`
 - 학습 산출물 `runs/`, 가상환경 `venv/`, 라벨 캐시 `*.cache`
