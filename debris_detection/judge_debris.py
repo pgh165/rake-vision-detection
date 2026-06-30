@@ -12,7 +12,7 @@ from collections import deque
 from ultralytics import YOLO
 
 # ===== 설정 =====
-MODEL_PATH = "C:/Users/parkj/Desktop/capstone/rake_detection/debris/runs/segment/debris_seg/exp1/weights/best.pt"
+MODEL_PATH = "C:/Users/parkj/Desktop/capstone/rake_detection/debris_detection/runs/segment/debris_seg/exp1/weights/best.pt"
 VIDEO_IN   = "C:/Users/parkj/Desktop/capstone/rake_detection/KakaoTalk_20260620_121546018.mp4"
 VIDEO_OUT  = "result_debris_cluster.mp4"
 
