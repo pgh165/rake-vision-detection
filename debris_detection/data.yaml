@@ -1,0 +1,6 @@
+path: C:/Users/parkj/Desktop/capstone/rake_detection/debris
+train: train/images
+val: valid/images
+
+nc: 1
+names: ['debris']

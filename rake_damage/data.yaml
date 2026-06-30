@@ -1,0 +1,5 @@
+path: C:\\Users\\parkj\\Desktop\\capstone\\rake_detection\\rake_dataset_ready
+train: train/images
+val: valid/images
+nc: 1
+names: ['damage']

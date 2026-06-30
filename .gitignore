@@ -1,0 +1,31 @@
+# 가상환경
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# 영상 (시연/결과)
+*.mp4
+*.avi
+*.mov
+
+# 모델 가중치 / export
+*.pt
+*.onnx
+*.hef
+
+# 학습 산출물
+runs/
+*_seg/
+rake_damage/exp*/
+debris_seg/
+
+# 라벨 캐시
+*.cache
+
+# 이미지 결과물
+*_detected*.png
+
+# OS
+.DS_Store
+Thumbs.db
